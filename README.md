@@ -257,13 +257,25 @@ PoC 성공 = 아래 전부 충족:
 
 ---
 
-## 9. 열린 질문 (구현자가 결정하거나 사용자에게 확인할 것)
+## 9. 열린 질문 → 확정 (2026-07-29 사용자 확인)
 
-- **Q1.** 사용자의 폰이 iOS인가 Android인가? Phase 0의 구체적 경로가 갈린다.
-- **Q2.** Claude Code를 인터랙티브 TUI로 쓰는가, Agent SDK/헤드리스로 감싸서 쓰는가? 후자면 훅 대신 스트림을 직접 잡을 수 있어 통제력이 훨씬 좋다.
-- **Q3.** 디바운스 시간과 발화 빈도 상한의 초기값. 실사용 하루 후 튜닝 필요.
-- **Q4.** 요약 LLM을 어디로 호출할 것인가 (API 키 관리, 비용 상한).
-- **Q5.** Slack 대신 텔레그램을 쓸 이유가 있는가? (봇 생성이 더 간단하고 음성노트 전송이 자연스럽다. Slack의 장점은 채널 구조와 기존 워크플로 통합.)
+아래 답이 앞 섹션의 서술을 **덮어쓴다.** 충돌하면 이 표가 맞다.
+
+| # | 질문 | 답 | 앞 섹션에서 덮어쓰는 것 |
+|---|---|---|---|
+| Q1 | 폰이 iOS인가 Android인가 | **Android** | 섹션 4 Phase 0의 iOS Announce Notifications 경로. 대체 경로는 `docs/phase0-android.md` |
+| Q2 | TUI인가 Agent SDK/헤드리스인가 | **Agent SDK / 헤드리스** | 섹션 5.1~5.2의 훅 기반 수집. 훅 대신 **트랜스크립트 JSONL을 직접 읽는다**. 스키마 실측 결과는 `.claude/skills/phase-gate/SKILL.md` |
+| Q3 | 디바운스·빈도 상한 초기값 | **30초 / 시간당 12회** | 섹션 6.1. `config.yaml`에서 조정. 실사용 하루 뒤 튜닝 |
+| Q4 | 요약 LLM 호출처 | **Anthropic API, `claude-haiku-4-5`** | 섹션 6.1의 "Haiku 급"을 구체화. 주의: Haiku 4.5는 `effort` 파라미터를 지원하지 않는다 |
+| Q5 | Slack인가 Telegram인가 | **Telegram** | 섹션 3 아키텍처와 섹션 6.4 전부. 채널당 1개 대신 **봇 1개 + 채팅 1개**. 라우팅 문제는 동일하게 사라진다 |
+
+Q1/Q2가 바뀌면 이 표와 `CLAUDE.md`의 결정 표를 **같이** 고칠 것.
+
+### 남은 미확인 사항
+
+- Telegram이 Android Gemini의 "Announce notifications" 앱 목록에 나오는가 (`docs/phase0-android.md`)
+- 낭독이 잘리지 않는 최대 글자 수 (`sv-send --ruler`로 실측 대기 중. 섹션 6.3의 200자는 **잠정값**)
+- 한국어 STT 바이어싱 벤더 선택 (`docs/research-stt.md` — Deepgram Nova-3만 후보이나 근거가 얇음)
 
 ---
 
