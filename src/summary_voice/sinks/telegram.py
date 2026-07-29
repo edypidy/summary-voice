@@ -39,12 +39,14 @@ class TelegramSink:
         try:
             response = httpx.post(
                 f"{API}/bot{self._token}/sendMessage",
+                # parse_mode 키를 아예 넣지 않는다. 그래야 평문으로 간다.
+                # `"parse_mode": None` 으로 두면 JSON에 null 이 실려 나가고
+                # 텔레그램이 400 "unsupported parse_mode" 로 거절한다.
+                # 파싱을 켜면 안 되는 이유: 내레이션은 평문인데 언더스코어가 든
+                # 식별자 하나에 400이 나서 알림을 통째로 잃는다.
                 json={
                     "chat_id": self._chat_id,
                     "text": text,
-                    # 마크다운 파싱을 끈다. 내레이션은 평문이고, 파싱을 켜면
-                    # 언더스코어가 든 식별자 하나에 400이 나서 알림을 통째로 잃는다.
-                    "parse_mode": None,
                     "disable_web_page_preview": True,
                 },
                 timeout=self._timeout,

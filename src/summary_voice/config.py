@@ -76,10 +76,33 @@ class Config:
         )
 
 
+def example_values(path: Path | None = None) -> dict[str, str]:
+    """`.env.example`의 자리표시자들. 채워 넣지 않은 값을 잡아내는 데 쓴다."""
+    path = path or REPO_ROOT / ".env.example"
+    if not path.is_file():
+        return {}
+    values: dict[str, str] = {}
+    for line in path.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        values[key.strip()] = value.strip().strip("\"'")
+    return values
+
+
 def require_env(name: str, hint: str = "") -> str:
-    """환경변수를 읽되, 없으면 무엇을 해야 하는지 알려주고 죽는다."""
+    """환경변수를 읽되, 없으면 무엇을 해야 하는지 알려주고 죽는다.
+
+    자리표시자를 그대로 둔 경우도 없는 것으로 친다. `.env.example` 을 복사해
+    일부만 채우는 건 흔한 일인데, 그대로 두면 텔레그램이 "chat not found" 같은
+    엉뚱한 오류를 돌려줘서 원인을 찾는 데 한참 걸린다.
+    """
     load_dotenv()
     value = os.environ.get(name)
+    placeholder = example_values().get(name)
+    if value and placeholder and value == placeholder:
+        value = None
     if not value:
         suffix = f"\n  {hint}" if hint else ""
         raise SystemExit(f"환경변수 {name} 가 없습니다. .env.example 을 참고해 .env 에 넣으세요.{suffix}")

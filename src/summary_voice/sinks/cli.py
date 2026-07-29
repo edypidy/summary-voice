@@ -86,6 +86,9 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     logging.basicConfig(level=logging.INFO, format="%(message)s", stream=sys.stderr)
+    # httpx 는 INFO 로 요청 URL 전체를 찍는다. 텔레그램은 봇 토큰이 URL 경로에 있어서
+    # 그대로 두면 매 호출마다 시크릿이 터미널과 로그에 남는다.
+    logging.getLogger("httpx").setLevel(logging.WARNING)
 
     if args.whoami:
         return _whoami()
