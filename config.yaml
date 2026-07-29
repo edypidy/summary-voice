@@ -1,0 +1,20 @@
+# summary-voice 런타임 설정. 시크릿은 여기가 아니라 .env 에 둔다.
+
+# 요약·살리언스 판정·STT 교정에 쓰는 모델. Haiku 급 (README 섹션 6.1).
+model: claude-haiku-4-5-20251001
+
+narration:
+  # README 섹션 6.3 하드 제약.
+  # max_chars 200은 **잠정값**이다. Phase 0에서 알림 낭독이 잘리지 않는
+  # 최대 글자 수를 실측한 뒤 이 값을 반드시 갱신할 것.
+  max_chars: 200
+  max_sentences: 3
+  language: ko
+
+relay:
+  # README Q3. 실사용 하루 뒤 튜닝 대상.
+  # 마지막 이벤트 후 이만큼 조용해야 발화한다. 짧으면 스팸, 길면 늦는다.
+  debounce_seconds: 30
+  # 발화 빈도 상한. 이어폰으로 듣는 것이라 시간당 12회면 5분에 한 번꼴이다.
+  max_narrations_per_hour: 12
+  poll_interval_seconds: 2.0
