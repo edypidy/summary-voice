@@ -29,7 +29,8 @@ class TestKoreanParticleAttachment:
 
     def test_공백_토큰화로는_안_잡히는_경우(self):
         # 순진하게 text.split() 했으면 "LoRA-XS가"는 "LoRA-XS"와 다른 토큰이다.
-        assert "LoRA-XS" not in "LoRA-XS가 발산해요".split()
+        # split() 호출이 이 테스트의 요점이다. 리터럴로 바꾸면 보여주려는 게 사라진다.
+        assert "LoRA-XS" not in "LoRA-XS가 발산해요".split()  # noqa: SIM905
         assert contains_term("LoRA-XS가 발산해요", "LoRA-XS")
 
 
