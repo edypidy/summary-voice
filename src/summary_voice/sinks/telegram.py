@@ -1,7 +1,7 @@
 """Telegram Bot API 전송 (README Q5).
 
 Slack 대신 Telegram을 쓰는 이유: 봇 생성이 @BotFather 대화 한 번이면 끝나고,
-음성노트 왕복이 자연스럽다 (Phase 3 양방향의 포석).
+답장 왕복이 자연스럽다 (Phase 2 양방향의 포석).
 
 `sendMessage` 하나만 쓴다. 그 이상은 필요 없다.
 """

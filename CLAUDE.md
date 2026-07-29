@@ -1,70 +1,84 @@
 # summary-voice
 
-연구자가 자리를 비운 사이 Claude Code 에이전트가 뭘 하고 있는지를 **이어폰으로 듣게** 해주는 관측 레이어.
+연구자가 자리를 비운 사이 Claude Code 에이전트가 뭘 하고 있는지를 **폰에서 읽게**
+해주는 관측 레이어.
 
-`README.md`가 전체 구현 플랜이자 스펙이다. 이 파일은 그 플랜을 코드로 옮길 때 지켜야 할 규약만 담는다.
-**작업 전에 README.md를 먼저 읽을 것.** 특히 섹션 3(설계 원칙)과 섹션 10(하지 말아야 할 것).
+> **이름 주의.** 레포 이름과 패키지 이름에 `voice`가 남아 있지만 **음성은 범위에서
+> 빠졌다.** Phase 0에서 실측해 탈락시켰다 (`docs/phase0-result.md`). 이름만 유물이다.
 
-## 확정된 결정 (README 섹션 9의 답)
+`README.md`가 전체 구현 플랜이자 스펙이다. 이 파일은 그 플랜을 코드로 옮길 때
+지켜야 할 규약만 담는다. **작업 전에 README.md를 먼저 읽을 것.**
+특히 섹션 3(설계 원칙), 섹션 6.3(요약 제약 - 개정됨), 섹션 10(하지 말아야 할 것).
+
+## 확정된 결정 (README 섹션 9)
 
 | # | 질문 | 답 | 영향 |
 |---|---|---|---|
-| Q1 | 폰 OS | **Android** | Phase 0 경로가 iOS Announce Notifications가 아님. `docs/phase0-android.md` 참조 |
-| Q2 | Claude Code 사용 형태 | **Agent SDK / 헤드리스** | 훅이 아니라 **스트림을 직접 캡처**한다. 통제력이 더 좋음 |
-| Q4 | LLM 호출처 | **Anthropic API, `claude-haiku-4-5`** (별칭, 날짜 접미사 붙이지 않음) | 살리언스 판정 + 내레이션 + STT 교정 모두. Haiku 4.5는 `effort` 파라미터 미지원 |
-| Q5 | 전송 채널 | **Telegram** | Slack 아님. 봇 생성이 즉시 되고 음성노트가 자연스러움 |
-| Q3 | 디바운스 초기값 | 30초, 시간당 발화 상한 12회 | 실사용 하루 뒤 튜닝. `config.yaml`에서 조정 |
+| Q1 | 폰 OS | Android | **무의미해짐.** 음성이 빠지면서 OS 의존이 사라졌다 |
+| Q2 | Claude Code 사용 형태 | **Agent SDK / 헤드리스** | 훅이 아니라 **트랜스크립트 JSONL을 직접 읽는다** |
+| Q3 | 디바운스 초기값 | 30초, 시간당 12회 | 실사용 하루 뒤 튜닝. `config.yaml` |
+| Q4 | LLM 호출처 | **Anthropic API, `claude-haiku-4-5`** (별칭) | 살리언스 판정 + 요약 생성. Haiku 4.5는 `effort` 미지원 |
+| Q5 | 전송 채널 | **Telegram** | 봇 1개 + 채팅 1개 |
+| Q6 | 음성을 쓸 것인가 | **아니오** | Phase 0 실측 결과. TTS/STT/용어집 전부 제거 |
+| Q7 | 양방향을 지금 만들 것인가 | **아니오, 받기 먼저** | Phase 2로 미룸 |
 
-Q1/Q2가 바뀌면 README와 이 표를 **같이** 고칠 것. 코드에만 반영하고 문서를 놔두지 말 것.
+Q2/Q6/Q7이 바뀌면 README와 이 표를 **같이** 고칠 것. 코드에만 반영하고 문서를 놔두지 말 것.
 
 ## 하드 제약 (위반 시 리뷰에서 반려)
 
-1. **캡처는 논블로킹.** 캡처 계층에서 LLM 호출·TTS·네트워크 I/O 금지. JSON 한 줄을 큐에 쓰고 끝낸다. 훅 경로를 쓸 경우 **항상 exit 0** (2는 블로킹 의미).
-2. **관측 실패가 연구 세션을 죽이면 안 된다.** 캡처 코드의 모든 예외는 삼키고 정상 종료한다. 로그만 남긴다.
-3. **Relay는 stateless.** 모든 상태는 디스크에. 강제 종료 후 재시작해도 `events.jsonl` + `last_event_offset`으로 이어져야 한다.
+1. **캡처는 논블로킹.** 캡처 계층에서 LLM 호출·네트워크 I/O 금지. JSON 한 줄을
+   쓰고 끝낸다. 훅 경로를 쓸 경우 **항상 exit 0** (2는 블로킹 의미).
+2. **관측 실패가 연구 세션을 죽이면 안 된다.** 캡처 코드의 모든 예외는 삼키고
+   정상 종료한다. 로그만 남긴다.
+3. **Relay는 stateless.** 모든 상태는 디스크에. 강제 종료 후 재시작해도
+   `events.jsonl` + `last_event_offset`으로 이어져야 한다.
 4. **Relay는 에이전트가 아니라 단순 API 호출.** 요약기에 툴/파일시스템 권한을 주지 않는다.
 5. **전체 트랜스크립트를 매 요약마다 넣지 않는다.** `state.json` + 신규 이벤트 델타만.
-6. **용어집은 프로젝트별로 스코프.** 전역 용어집을 만들지 않는다. 프로젝트당 100개 이하.
+6. **살리언스는 2단계.** 규칙 기반 1차 필터 → LLM boolean 판정 → true일 때만
+   요약 생성. 한 번에 하면 비용이 몇 배가 된다.
 
-## 내레이션 규칙 (귀로 듣는 텍스트다)
+## 요약 규칙 (눈으로 읽는 텍스트다)
 
-- 한국어, **3문장 이하**, `config.yaml`의 `max_chars` 이하 (Phase 0 실측 전 잠정 200자)
-- 코드 블록·경로·긴 식별자 금지. `hierarchical_cross_attention.py` → "크로스 어텐션 모듈"
-- 숫자 최소화. loss 값 나열 금지
+이전 판의 규칙은 **낭독을 전제**했다. Phase 0에서 뒤집혔으니 옛 규칙을 따르지 말 것.
+
+- 한국어, `config.yaml`의 `max_chars` 이하 (잠정 600자)
+- **식별자·경로·줄 번호를 원문 그대로 쓴다.** `train.py:142`, `LoRA-XS`, `Sinkhorn`.
+  풀어 쓰지 말 것 - 사용자가 터미널로 돌아가 그대로 검색한다
+- **숫자를 넣는다.** loss, 에폭, 소요 시간. 읽는 사람이 판단하는 데 쓴다
+- 첫 줄이 결론. 알림 미리보기에서 잘려도 첫 줄만으로 무슨 일인지 알아야 한다
 - 에이전트가 여럿이면 주어 명시 ("2번 에이전트가...")
-- 낭독 적합성 > 텍스트 품질. 읽어서 좋은 요약과 들어서 좋은 요약은 다르다
+- **마크다운 문법 금지.** `parse_mode`를 끄고 보내므로 `**굵게**`는 별표가 그대로 보인다
 
-이 제약을 강제하는 검사기는 **Phase 2에서 내레이션 생성기와 함께 만든다.**
-지금은 없다. Phase 0 게이트를 통과하기 전에 미리 만들지 말 것.
+폐기된 규칙: ~~3문장 이하~~, ~~코드·경로·긴 식별자 금지~~, ~~숫자 최소화~~,
+~~`hierarchical_cross_attention.py` → "크로스 어텐션 모듈"~~
 
 ## 개발 순서 (역순 검증 - 뒤집지 말 것)
 
-가장 불확실한 것이 뒤쪽(음성 UX)이라 앞쪽(파이프라인)부터 만들면 다 만들고 안 쓰게 된다.
+가장 불확실한 것이 뒤쪽(사람이 실제로 쓰는가)이라 앞쪽(파이프라인)부터 만들면
+다 만들고 안 쓰게 된다. **이 원칙은 이미 한 번 값을 했다** - Phase 0이 음성을
+탈락시켰고, 그때 버려진 건 아직 안 만든 파이프라인이었다.
 
-- **Phase 0** 음성 UX 검증 (수동, 코드 거의 없음) ← 여기가 게이트
-- **Phase 1** 용어집 + STT 교정 (Phase 0과 병렬 가능)
-- **Phase 2** 이벤트 캡처 → 살리언스 → 내레이션 → Telegram
-- **Phase 3** Injector / 양방향 (범위 외)
-
-**Phase 0이 불합격이면 Phase 2를 만들지 말 것.** 전송 계층을 재설계해야 한다.
+- **Phase 0** 전송 UX 검증 ✅ 완료. 텍스트 합격 / 음성 불합격
+- **Phase 1** 이벤트 캡처 → 살리언스 → 요약 → Telegram ← **현재 단계**
+- **Phase 2** 양방향 (지시 전달). Phase 1 합격 후에만
+- 범위 외: 음성
 
 ## 레이아웃
 
 ```
 src/summary_voice/
-  capture/    Agent SDK 스트림 리스너 + 훅 폴백. 논블로킹, 큐에 쓰기만
-  glossary/   레포에서 용어집 자동 추출 (AST/config/tex/git log)
-  stt/        레이어 1 바이어싱 + 레이어 2 LLM 교정 + term recall 평가
-  relay/      디바운스 → 살리언스 판정 → 내레이션 생성
+  capture/    트랜스크립트 리스너. 논블로킹, 쓰기만
+  relay/      디바운스 → 살리언스 판정 → 요약 생성
   sinks/      Telegram 전송 (인터페이스 뒤에 두어 교체 가능)
-docs/         Phase 0 셋업 가이드, 리서치 노트, 결정 기록
-data/         평가용 발화 20개 + 정답 전사 (녹음은 커밋 안 함)
-.claude/skills/  프로젝트 전용 스킬
+docs/         Phase 0 결과, 결정 기록
 ```
 
 런타임 상태는 코드 옆이 아니라 **관측 대상 프로젝트** 밑에 쌓인다:
-`<target-project>/.assistant/{queue,events.jsonl,state.json,glossary.json,narrations.jsonl}`
+`<target-project>/.assistant/{queue,events.jsonl,state.json,narrations.jsonl}`
 이 디렉터리는 절대 커밋하지 않는다 (`.gitignore`에 있음).
+
+제거된 것 (커밋 `5c58d8d`에 있음): `glossary/`, `stt/`, `sinks/ruler.py`, `data/`.
+전부 음성용이었다. 되살리려면 `docs/phase0-result.md`의 판정부터 읽을 것.
 
 ## 명령어
 
@@ -72,10 +86,9 @@ data/         평가용 발화 20개 + 정답 전사 (녹음은 커밋 안 함)
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 
-sv-glossary <project-path>        # 용어집 추출 → .assistant/glossary.json
-sv-send "테스트 문장"              # Phase 0용, Telegram에 한 줄 보내기
-# sv-relay 는 Phase 2에서 추가
-sv-eval                           # term recall 평가 (비교군 4개)
+sv-send --whoami                  # TELEGRAM_CHAT_ID 찾기
+sv-send "테스트 문장"              # 한 줄 보내기
+# sv-relay 는 릴레이를 만들 때 함께 추가
 
 pytest && ruff check .
 ```
@@ -85,13 +98,17 @@ pytest && ruff check .
 `.env`에 두고 절대 커밋하지 않는다. `.env.example`을 참고.
 `ANTHROPIC_API_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`.
 
+**텔레그램 봇 토큰은 URL 경로에 들어간다.** httpx의 INFO 로그가 요청 URL을 통째로
+찍으므로, 텔레그램을 호출하는 코드에서는 `logging.getLogger("httpx")`를 WARNING으로
+올릴 것. 안 그러면 매 호출마다 시크릿이 터미널과 로그에 남는다. 실제로 겪었다.
+
 ## 검증 대상 레포
 
-`../agent-research-poc` (의료영상 AI, 실제 사용자 레포)를 용어집 추출과 이벤트 캡처의
+`../agent-research-poc` (의료영상 AI, 실제 사용자 레포)를 이벤트 캡처의
 테스트 타깃으로 쓴다. 읽기만 한다. **이 레포를 수정하지 말 것.**
 
 ## 합격 기준 (README 섹션 8)
 
-가장 중요한 것: 실제 연구 세션 하루를 돌렸을 때
+실제 연구 세션 하루를 돌렸을 때
 **"이건 안 보내도 됐다" 30% 이하, "이건 알았어야 했는데 못 받았다" 0건.**
-나머지 기준은 README 섹션 8 참조.
+이것만이 진짜 기준이다. 나머지는 하루를 버티기 위한 조건이다.

@@ -37,11 +37,11 @@ def load_dotenv(path: Path | None = None) -> None:
 class NarrationConfig:
     """README 섹션 6.3의 하드 제약.
 
-    max_chars는 Phase 0에서 **실측**한 값으로 바꿔야 한다. 200은 잠정값이다.
+    600은 잠정값이다. 이전 판의 200자와 3문장 제한은 낭독을 전제한 값이었는데
+    Phase 0에서 음성이 탈락하면서 근거가 사라졌다 (docs/phase0-result.md).
     """
 
-    max_chars: int = 200
-    max_sentences: int = 3
+    max_chars: int = 600
     language: str = "ko"
 
 

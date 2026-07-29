@@ -1,7 +1,7 @@
 [project]
 name = "summary-voice"
 version = "0.1.0"
-description = "Listen to what your Claude Code agents are doing, in Korean, through your earphones."
+description = "Read what your Claude Code agents are doing, in Korean, on your phone."
 requires-python = ">=3.11"
 dependencies = [
     "anthropic>=0.40.0",
@@ -10,20 +10,15 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-stt = [
-    "faster-whisper>=1.0.0",
-]
 dev = [
     "pytest>=8.0",
     "ruff>=0.6",
 ]
 
 [project.scripts]
-sv-glossary = "summary_voice.glossary.cli:main"
 sv-send = "summary_voice.sinks.cli:main"
-sv-eval = "summary_voice.stt.evaluate:main"
-# sv-relay 는 Phase 2에서 추가한다. 먼저 선언해두면 설치는 되는데 실행하면
-# ImportError 로 죽는 명령이 생긴다.
+# sv-relay 는 릴레이를 만들 때 함께 추가한다. 먼저 선언해두면 설치는 되는데
+# 실행하면 ImportError 로 죽는 명령이 생긴다.
 
 [build-system]
 requires = ["setuptools>=68"]
