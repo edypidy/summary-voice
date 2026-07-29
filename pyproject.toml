@@ -20,9 +20,10 @@ dev = [
 
 [project.scripts]
 sv-glossary = "summary_voice.glossary.cli:main"
-sv-relay = "summary_voice.relay.daemon:main"
 sv-send = "summary_voice.sinks.cli:main"
 sv-eval = "summary_voice.stt.evaluate:main"
+# sv-relay 는 Phase 2에서 추가한다. 먼저 선언해두면 설치는 되는데 실행하면
+# ImportError 로 죽는 명령이 생긴다.
 
 [build-system]
 requires = ["setuptools>=68"]

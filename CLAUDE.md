@@ -11,7 +11,7 @@
 |---|---|---|---|
 | Q1 | 폰 OS | **Android** | Phase 0 경로가 iOS Announce Notifications가 아님. `docs/phase0-android.md` 참조 |
 | Q2 | Claude Code 사용 형태 | **Agent SDK / 헤드리스** | 훅이 아니라 **스트림을 직접 캡처**한다. 통제력이 더 좋음 |
-| Q4 | LLM 호출처 | **Anthropic API, Haiku 4.5** (`claude-haiku-4-5-20251001`) | 살리언스 판정 + 내레이션 + STT 교정 모두 |
+| Q4 | LLM 호출처 | **Anthropic API, `claude-haiku-4-5`** (별칭, 날짜 접미사 붙이지 않음) | 살리언스 판정 + 내레이션 + STT 교정 모두. Haiku 4.5는 `effort` 파라미터 미지원 |
 | Q5 | 전송 채널 | **Telegram** | Slack 아님. 봇 생성이 즉시 되고 음성노트가 자연스러움 |
 | Q3 | 디바운스 초기값 | 30초, 시간당 발화 상한 12회 | 실사용 하루 뒤 튜닝. `config.yaml`에서 조정 |
 
@@ -74,7 +74,7 @@ pip install -e ".[dev]"
 
 sv-glossary <project-path>        # 용어집 추출 → .assistant/glossary.json
 sv-send "테스트 문장"              # Phase 0용, Telegram에 한 줄 보내기
-sv-relay <project-path>           # Relay 데몬
+# sv-relay 는 Phase 2에서 추가
 sv-eval                           # term recall 평가 (비교군 4개)
 
 pytest && ruff check .
