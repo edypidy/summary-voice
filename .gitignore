@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+*.token
+credentials.json
+
+# Runtime state produced by the assistant (per-project, not source)
+.assistant/
+**/.assistant/
+
+# Phase 0 / evaluation artifacts
+data/recordings/*.wav
+data/recordings/*.m4a
+data/recordings/*.mp3
+!data/recordings/.gitkeep
+outputs/
+
+# Editors / OS
+.DS_Store
+*.swp
+.idea/
+.vscode/

@@ -1,0 +1,39 @@
+[project]
+name = "summary-voice"
+version = "0.1.0"
+description = "Listen to what your Claude Code agents are doing, in Korean, through your earphones."
+requires-python = ">=3.11"
+dependencies = [
+    "anthropic>=0.40.0",
+    "httpx>=0.27.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+stt = [
+    "faster-whisper>=1.0.0",
+]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[project.scripts]
+sv-glossary = "summary_voice.glossary.cli:main"
+sv-relay = "summary_voice.relay.daemon:main"
+sv-send = "summary_voice.sinks.cli:main"
+sv-eval = "summary_voice.stt.evaluate:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
