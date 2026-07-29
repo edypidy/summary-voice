@@ -8,9 +8,9 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable
 
 # 프로젝트당 상한. README 섹션 7.1: 100개 이하로 유지되어야
 # 대부분의 STT 바이어싱 API 제한 안에 들어가고 정확도도 더 높다.
