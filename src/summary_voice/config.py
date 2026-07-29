@@ -59,7 +59,8 @@ class Config:
     narration: NarrationConfig = field(default_factory=NarrationConfig)
     relay: RelayConfig = field(default_factory=RelayConfig)
     # Haiku 급을 쓴다 (README 섹션 6.1). 요약은 싸고 빨라야 한다.
-    model: str = "claude-haiku-4-5-20251001"
+    # 별칭으로 지정한다. Haiku 4.5는 effort 파라미터를 지원하지 않는다.
+    model: str = "claude-haiku-4-5"
 
     @classmethod
     def load(cls, path: Path | None = None) -> Config:

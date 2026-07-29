@@ -1,7 +1,9 @@
 # summary-voice 런타임 설정. 시크릿은 여기가 아니라 .env 에 둔다.
 
 # 요약·살리언스 판정·STT 교정에 쓰는 모델. Haiku 급 (README 섹션 6.1).
-model: claude-haiku-4-5-20251001
+# 별칭을 쓴다. 날짜 접미사를 붙이지 않는다.
+# 주의: Haiku 4.5는 output_config.effort 를 지원하지 않는다 (에러가 난다).
+model: claude-haiku-4-5
 
 narration:
   # README 섹션 6.3 하드 제약.

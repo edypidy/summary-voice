@@ -1,0 +1,20 @@
+{"id": "u01", "reference": "LoRA-XS 로스가 발산하는 것 같은데 스텝 수를 줄여볼까요"}
+{"id": "u02", "reference": "Sinkhorn 정규화 루프가 너무 느려서 iteration을 좀 낮췄어요"}
+{"id": "u03", "reference": "cross-attention 쪽에서 STE hard selection이 문제인 것 같아요"}
+{"id": "u04", "reference": "PEFT 설정 바꿔서 다시 돌려보고 결과 알려주세요"}
+{"id": "u05", "reference": "Mutual EM Attention 구현이 논문이랑 다른 것 같은데 확인해줘"}
+{"id": "u06", "reference": "DDPM 샘플링을 DDIM으로 바꾸면 얼마나 빨라지나요"}
+{"id": "u07", "reference": "UNet 채널 수를 늘렸더니 VRAM이 부족해요"}
+{"id": "u08", "reference": "FID가 안 떨어지는데 EMA를 켜고 다시 학습해볼게요"}
+{"id": "u09", "reference": "batch_size를 반으로 줄이고 grad_clip을 걸어주세요"}
+{"id": "u10", "reference": "WGAN gradient penalty 쪽 코드가 이상한 것 같아요"}
+{"id": "u11", "reference": "X-ray 데이터셋 전처리에서 normalize를 빼먹은 것 같은데요"}
+{"id": "u12", "reference": "GenerativeTrainer에서 체크포인트 저장이 안 되고 있어요"}
+{"id": "u13", "reference": "hierarchical cross attention 모듈만 따로 테스트해볼 수 있나요"}
+{"id": "u14", "reference": "optimal transport 쪽 loss가 NaN으로 터졌습니다"}
+{"id": "u15", "reference": "num_workers를 줄여야 데이터 로더가 안 죽을 것 같아요"}
+{"id": "u16", "reference": "CUDA out of memory가 계속 나는데 AMP를 켜볼까요"}
+{"id": "u17", "reference": "LoRA rank를 4에서 8로 올리면 성능이 좋아질까요"}
+{"id": "u18", "reference": "ClassifierTrainer 쪽 evaluation 로직을 다시 봐주세요"}
+{"id": "u19", "reference": "WandbLogger가 로그를 안 남기는 것 같은데 확인 부탁해요"}
+{"id": "u20", "reference": "cross-attention이랑 self-attention 결과를 비교해서 정리해줘"}
